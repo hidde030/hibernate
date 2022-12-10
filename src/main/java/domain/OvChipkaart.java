@@ -1,36 +1,80 @@
 package domain;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "ov_chipkaart", schema = "public", catalog = "ov-chipkaart")
+@Table(name = "ov_chipkaart")
 public class OvChipkaart {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "ovchipkaart_sequence",
+            sequenceName = "ovchipkaart_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "ovchipkaart_sequence"
+    )
     @Id
-    @Column(name = "kaart_nummer", nullable = false, precision = 0)
-    private int kaartNummer;
-    @Basic
-    @Column(name = "geldig_tot", nullable = false)
+    @Column(name = "kaart_nummer")
+    private int id;
+    @Column(name = "geldig_tot")
     private Date geldigTot;
-    @Basic
-    @Column(name = "klasse", nullable = false, precision = 0)
-    private BigInteger klasse;
-    @Basic
-    @Column(name = "saldo", nullable = false, precision = 2)
-    private BigDecimal saldo;
-    @Basic
-    @Column(name = "reiziger_id", nullable = false, precision = 0)
-    private int reizigerId;
+    private int klasse;
+    private Double saldo;
+    @ManyToOne
+    @JoinColumn(name = "reiziger_id")
+    private Reiziger reiziger;
+    @ManyToMany(mappedBy = "ovChipkaartList")
+    private List<Product> productList = new ArrayList<>();
 
-    public int getKaartNummer() {
-        return kaartNummer;
+    public OvChipkaart(int id, Date geldigTot, int klasse, Double saldo, Reiziger reiziger) {
+        this.id = id;
+        this.geldigTot = geldigTot;
+        this.klasse = klasse;
+        this.saldo = saldo;
+        this.reiziger = reiziger;
     }
 
-    public void setKaartNummer(int kaartNummer) {
-        this.kaartNummer = kaartNummer;
+    public OvChipkaart(int id, Date geldigTot, int klasse, Double saldo, Reiziger reiziger, List<Product> productList) {
+        this.id = id;
+        this.geldigTot = geldigTot;
+        this.klasse = klasse;
+        this.saldo = saldo;
+        this.reiziger = reiziger;
+        this.productList = productList;
+    }
+
+    public OvChipkaart() {
+    }
+
+    public List<Product> getProductList() {
+        return productList;
+    }
+
+    public void setProductList(List<Product> productList) {
+        this.productList = productList;
+    }
+
+    public void addProduct(Product product) {
+        if (productList == null || !productList.contains(product)) {
+            this.productList = new ArrayList<>();
+        }
+        this.productList.add(product);
+    }
+
+    public void removeProduct(Product product) {
+        this.productList.remove(product);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public Date getGeldigTot() {
@@ -41,65 +85,40 @@ public class OvChipkaart {
         this.geldigTot = geldigTot;
     }
 
-    public BigInteger getKlasse() {
+    public int getKlasse() {
         return klasse;
     }
 
-    public void setKlasse(BigInteger klasse) {
+    public void setKlasse(int klasse) {
         this.klasse = klasse;
     }
 
-    public BigDecimal getSaldo() {
+    public Double getSaldo() {
         return saldo;
     }
 
-    public void setSaldo(BigDecimal saldo) {
+    public void setSaldo(Double saldo) {
         this.saldo = saldo;
     }
 
-    public int getReizigerId() {
-        return reizigerId;
+    public Reiziger getReiziger() {
+        return reiziger;
     }
 
-    public void setReizigerId(int reizigerId) {
-        this.reizigerId = reizigerId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        OvChipkaart that = (OvChipkaart) o;
-
-        if (kaartNummer != that.kaartNummer) return false;
-        if (reizigerId != that.reizigerId) return false;
-        if (geldigTot != null ? !geldigTot.equals(that.geldigTot) : that.geldigTot != null) return false;
-        if (klasse != null ? !klasse.equals(that.klasse) : that.klasse != null) return false;
-        if (saldo != null ? !saldo.equals(that.saldo) : that.saldo != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = kaartNummer;
-        result = 31 * result + (geldigTot != null ? geldigTot.hashCode() : 0);
-        result = 31 * result + (klasse != null ? klasse.hashCode() : 0);
-        result = 31 * result + (saldo != null ? saldo.hashCode() : 0);
-        result = 31 * result + reizigerId;
-        return result;
+    public void setReiziger(Reiziger reiziger) {
+        this.reiziger = reiziger;
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("OvChipkaart{");
-        sb.append("kaartNummer=").append(kaartNummer);
-        sb.append(", geldigTot=").append(geldigTot);
-        sb.append(", klasse=").append(klasse);
-        sb.append(", saldo=").append(saldo);
-        sb.append(", reizigerId=").append(reizigerId);
-        sb.append('}');
-        return sb.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        if (productList != null) {
+            for (Product p : productList) {
+                stringBuilder.append(p);
+                stringBuilder.append(", ");
+            }
+        }
+        String producten = stringBuilder.toString();
+        return String.format("OvChipkaart {%s, Geldig tot: %s, Klasse: %s, €%s, %s}", id, geldigTot, klasse, saldo, producten);
     }
 }

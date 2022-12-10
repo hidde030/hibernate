@@ -25,7 +25,6 @@
 
         <mapping class="domain.Adres"/>
         <mapping class="domain.OvChipkaart"/>
-        <mapping class="domain.OvChipkaartProduct"/>
         <mapping class="domain.Product"/>
         <mapping class="domain.Reiziger"/>
 

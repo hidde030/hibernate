@@ -1,30 +1,78 @@
 package domain;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Product {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    @Column(name = "product_nummer", nullable = false, precision = 0)
-    private int productNummer;
-    @Basic
-    @Column(name = "naam", nullable = false, length = 30)
-    private String naam;
-    @Basic
-    @Column(name = "beschrijving", nullable = false, length = 512)
-    private String beschrijving;
-    @Basic
-    @Column(name = "prijs", nullable = false, precision = 2)
-    private BigDecimal prijs;
 
-    public int getProductNummer() {
-        return productNummer;
+    @SequenceGenerator(
+            name = "product_sequence",
+            sequenceName = "product_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "product_sequence"
+    )
+    @Id
+    @Column(name = "product_nummer")
+    private int id;
+    private String naam;
+    private String beschrijving;
+    private Double prijs;
+    @ManyToMany
+    @JoinTable(
+            name = "ov_chipkaart_product",
+            joinColumns = @JoinColumn(name = "product_nummer"),
+            inverseJoinColumns = @JoinColumn(name = "kaart_nummer")
+    )
+    private List<OvChipkaart> ovChipkaartList = new ArrayList<>();
+
+    public Product(int id, String naam, String beschrijving, Double prijs) {
+        this.id = id;
+        this.naam = naam;
+        this.beschrijving = beschrijving;
+        this.prijs = prijs;
     }
 
-    public void setProductNummer(int productNummer) {
-        this.productNummer = productNummer;
+    public Product(int id, String naam, String beschrijving, Double prijs, List<OvChipkaart> ovChipkaartList) {
+        this.id = id;
+        this.naam = naam;
+        this.beschrijving = beschrijving;
+        this.prijs = prijs;
+        this.ovChipkaartList = ovChipkaartList;
+    }
+
+    public Product() {
+    }
+
+    public List<OvChipkaart> getOvchipkaartList() {
+        return ovChipkaartList;
+    }
+
+    public void setOvChipkaartList(List<OvChipkaart> ovChipkaartList) {
+        this.ovChipkaartList = ovChipkaartList;
+    }
+
+    public void addChipkaart(OvChipkaart ovChipkaart) {
+        if (ovChipkaartList == null) {
+            this.ovChipkaartList = new ArrayList<>();
+        }
+        this.ovChipkaartList.add(ovChipkaart);
+    }
+
+    public void removeChipkaart(OvChipkaart ovChipkaart) {
+        this.ovChipkaartList.remove(ovChipkaart);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNaam() {
@@ -43,47 +91,16 @@ public class Product {
         this.beschrijving = beschrijving;
     }
 
-    public BigDecimal getPrijs() {
+    public Double getPrijs() {
         return prijs;
     }
 
-    public void setPrijs(BigDecimal prijs) {
+    public void setPrijs(Double prijs) {
         this.prijs = prijs;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Product product = (Product) o;
-
-        if (productNummer != product.productNummer) return false;
-        if (naam != null ? !naam.equals(product.naam) : product.naam != null) return false;
-        if (beschrijving != null ? !beschrijving.equals(product.beschrijving) : product.beschrijving != null)
-            return false;
-        if (prijs != null ? !prijs.equals(product.prijs) : product.prijs != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = productNummer;
-        result = 31 * result + (naam != null ? naam.hashCode() : 0);
-        result = 31 * result + (beschrijving != null ? beschrijving.hashCode() : 0);
-        result = 31 * result + (prijs != null ? prijs.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Product{");
-        sb.append("productNummer=").append(productNummer);
-        sb.append(", naam='").append(naam).append('\'');
-        sb.append(", beschrijving='").append(beschrijving).append('\'');
-        sb.append(", prijs=").append(prijs);
-        sb.append('}');
-        return sb.toString();
+    public String toString() {;
+        return String.format("Product {%s, %s, %s, €%s}", id, naam, beschrijving, prijs);
     }
 }
